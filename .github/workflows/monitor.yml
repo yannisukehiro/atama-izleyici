@@ -1,0 +1,29 @@
+name: Atama Izleyici
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # 15 dakikada bir
+  workflow_dispatch:         # elle de çalıştırılabilir
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install playwright && playwright install --with-deps chromium
+      - name: Siteleri kontrol et
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python monitor.py
+      - name: Durumu kaydet
+        run: |
+          git config user.name "izleyici-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add state.json
+          git diff --staged --quiet || (git commit -m "durum güncellendi" && git push)
