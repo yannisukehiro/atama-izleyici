@@ -1,0 +1,17 @@
+{
+ "Kamu İlan (SBB)": {
+  "seen": [
+   "Geographic Restriction Error 403 - Access Denied Access from your region is not permitted. This restriction is enforced by the website administrator based on geographic location policies. If you believe this is an error, please contact the site administrator. Powered by altosec.com||",
+   "altosec.com||https://altosec.com/"
+  ],
+  "fails": 0
+ },
+ "Kariyer Kapısı - İşe Alım": {
+  "seen": [],
+  "fails": 1
+ },
+ "Yerel Yönetimler (ÇŞB)": {
+  "seen": [],
+  "fails": 1
+ }
+}
