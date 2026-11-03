@@ -1,0 +1,9 @@
+Atama Izleyici - Windows
+
+1) Bu klasorun tamamini bilgisayarinda kalici bir yere cikar (ornegin Belgeler\AtamaIzleyici).
+   Zip icinden calistirma, once "Tumunu ayikla" yap.
+2) setup.bat dosyasina cift tikla. Python yoksa kendisi kurar, sonra setup.bat'i bir kez daha calistir.
+3) Telefonuna deneme bildirimi gelirse kurulum tamamdir.
+
+Kaldirmak icin: PowerShell'de  Unregister-ScheduledTask -TaskName AtamaIzleyici -Confirm:$false
+Sorun olursa log.txt dosyasini bana gonder.
