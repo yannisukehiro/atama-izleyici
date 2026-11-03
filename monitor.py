@@ -23,23 +23,37 @@ NTFY_TOPIC = os.environ["NTFY_TOPIC"]
 
 
 def notify(text: str) -> None:
+    """ntfy JSON API ile gönderir (Türkçe karakter/emoji sorunu yok). Hata olursa çökmez."""
     print("BİLDİRİM:", text)
-    first = text.split("\n", 1)[0]
-    req = urllib.request.Request(
-        f"https://ntfy.sh/{NTFY_TOPIC}",
-        data=text[:3500].encode("utf-8"),
-        headers={
-            "Title": first.encode("utf-8").decode("latin-1", "ignore") or "Atama",
-            "Priority": "high",
-        },
-    )
-    urllib.request.urlopen(req, timeout=30).read()
+    lines = text.split("\n", 1)
+    body = json.dumps(
+        {
+            "topic": NTFY_TOPIC,
+            "title": lines[0][:120],
+            "message": (lines[1] if len(lines) > 1 else lines[0])[:3500],
+            "priority": 4,
+        }
+    ).encode("utf-8")
+    try:
+        req = urllib.request.Request(
+            "https://ntfy.sh/",
+            data=body,
+            headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=30).read()
+    except Exception as e:  # noqa: BLE001
+        print(f"ntfy gönderilemedi: {e}", file=sys.stderr)
 
 
 def scrape(page, url: str) -> dict:
     """Sayfadaki tüm (metin, link) çiftlerini döndürür. {anahtar: başlık}"""
-    page.goto(url, wait_until="networkidle", timeout=60000)
+    page.goto(url, wait_until="domcontentloaded", timeout=90000)
+    try:
+        page.wait_for_load_state("networkidle", timeout=20000)
+    except Exception:  # noqa: BLE001
+        pass
     page.wait_for_timeout(3000)
+    print(f"  [{url}] başlık={page.title()!r} uzunluk={len(page.content())}")
     items = page.evaluate(
         """() => {
           const out = [];
