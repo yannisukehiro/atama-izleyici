@@ -79,12 +79,16 @@ def scrape(page, url: str) -> dict:
 def main() -> int:
     if os.environ.get("SEND_TEST"):
         notify("🧪 Deneme bildirimi\nAtama izleyici çalışıyor, bildirimler bu konuya geliyor.")
-    state = json.loads(STATE_FILE.read_text()) if STATE_FILE.exists() else {}
+    state = json.loads(STATE_FILE.read_text(encoding="utf-8")) if STATE_FILE.exists() else {}
     first_run = not state
     errors = 0
 
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = (
+            p.chromium.launch(channel="msedge")  # Windows: yüklü Edge
+            if os.environ.get("USE_EDGE")
+            else p.chromium.launch()
+        )
         ctx = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
@@ -119,7 +123,7 @@ def main() -> int:
                     notify(f"⚠️ {name} {FAIL_ALERT_THRESHOLD} kez üst üste okunamadı: {e}\n{url}")
         browser.close()
 
-    STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=1))
+    STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
     if first_run:
         notify("✅ Atama izleyici kuruldu. Bundan sonra yeni içerik çıkınca haber vereceğim.")
     return 0
