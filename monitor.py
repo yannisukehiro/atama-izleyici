@@ -77,6 +77,8 @@ def scrape(page, url: str) -> dict:
 
 
 def main() -> int:
+    if os.environ.get("SEND_TEST"):
+        notify("🧪 Deneme bildirimi\nAtama izleyici çalışıyor, bildirimler bu konuya geliyor.")
     state = json.loads(STATE_FILE.read_text()) if STATE_FILE.exists() else {}
     first_run = not state
     errors = 0

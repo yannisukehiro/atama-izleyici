@@ -20,6 +20,7 @@ jobs:
       - name: Siteleri kontrol et
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          SEND_TEST: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
         run: python monitor.py
       - name: Durumu kaydet
         run: |
