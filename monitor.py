@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -19,7 +20,8 @@ SITES = {
 STATE_FILE = Path("state.json")
 FAIL_ALERT_THRESHOLD = 3  # üst üste bu kadar hatadan sonra haber ver
 
-NTFY_TOPIC = os.environ["NTFY_TOPIC"]
+NTFY_TOPIC = os.environ["NTFY_TOPIC"].strip()
+print(f"ntfy konu uzunluğu: {len(NTFY_TOPIC)}")
 
 
 def notify(text: str) -> None:
@@ -41,6 +43,8 @@ def notify(text: str) -> None:
             headers={"Content-Type": "application/json"},
         )
         urllib.request.urlopen(req, timeout=30).read()
+    except urllib.error.HTTPError as e:
+        print(f"ntfy gönderilemedi: {e} -> {e.read()[:300]!r}", file=sys.stderr)
     except Exception as e:  # noqa: BLE001
         print(f"ntfy gönderilemedi: {e}", file=sys.stderr)
 
