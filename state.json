@@ -7,11 +7,15 @@
   "fails": 0
  },
  "Kariyer Kapısı - İşe Alım": {
-  "seen": [],
-  "fails": 2
+  "seen": [
+   "Sıkça Sorulan Sorular||https://kariyerkapisi.gov.tr/sss",
+   "e-Devlet ile Giriş||https://giris.turkiye.gov.tr/OAuth2AuthorizationServer/AuthorizationController?response_type=code&client_id=887456ea-c32d-446f-8b10-6167e55eaf36&state=random_value&scope=Kimlik-Dogrula&redirect_uri=https://kariyerkapisi.gov.tr/elogin",
+   "Şu an aktif bir ilan bulunmamaktadır.||"
+  ],
+  "fails": 0
  },
  "Yerel Yönetimler (ÇŞB)": {
   "seen": [],
-  "fails": 2
+  "fails": 3
  }
 }
