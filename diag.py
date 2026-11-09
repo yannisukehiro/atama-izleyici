@@ -18,6 +18,10 @@ with sync_playwright() as p:
         except Exception as e:
             calls.append((r.request.method, r.status, r.url, "?", 0, f"okunamadı: {e}"))
     page.on("response", on_resp)
+    allreq = []
+    page.on("request", lambda r: allreq.append((r.method, r.resource_type, r.url)))
+    page.on("console", lambda m: print("CONSOLE:", m.type, m.text[:200]))
+    page.on("requestfailed", lambda r: print("REQFAILED:", r.url[:160], r.failure))
     page.goto(URL, wait_until="domcontentloaded", timeout=90000)
     try: page.wait_for_load_state("networkidle", timeout=30000)
     except Exception: pass
@@ -28,6 +32,17 @@ with sync_playwright() as p:
     print("BODY_TEXT_LEN:", len(txt))
     print("BODY_TEXT_START:\n", txt[:1500])
     print("LINKS:", page.evaluate("document.querySelectorAll('a[href]').length"))
+    print("\n=== TÜM İSTEKLER (analytics/statik hariç) ===")
+    for m, t, u in allreq:
+        if any(x in u for x in ("google", "gstatic", ".png", ".jpg", ".svg", ".woff", ".css", ".ico")):
+            continue
+        print(m, t, u[:200])
+    print("\n=== TABLO/FORM HTML ===")
+    for sel in ("table", "form", "select"):
+        n = page.evaluate(f"document.querySelectorAll('{sel}').length")
+        print(sel, "adet:", n)
+    print(page.evaluate("(document.querySelector('table')||document.body).outerHTML.slice(0,2500)"))
+    print("BUTTONS:", page.evaluate("[...document.querySelectorAll('button,input[type=submit],a.btn')].map(e=>(e.innerText||e.value||'').trim()).filter(Boolean).slice(0,20)"))
     print("\n=== XHR/FETCH ===")
     for c in calls:
         print(c[0], c[1], c[2], c[3], c[4])
