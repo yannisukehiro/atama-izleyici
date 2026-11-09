@@ -1,10 +1,10 @@
 """Teşhis: bir sayfanın ağ isteklerini ve içeriğini loga döker."""
-import json, sys
+import json, os, sys
 from playwright.sync_api import sync_playwright
 
 URL = sys.argv[1]
 with sync_playwright() as p:
-    b = p.chromium.launch()
+    b = p.chromium.launch(channel="msedge") if os.environ.get("USE_EDGE") else p.chromium.launch()
     ctx = b.new_context(locale="tr-TR", ignore_https_errors=True,
         user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36")
     page = ctx.new_page()
@@ -14,7 +14,10 @@ with sync_playwright() as p:
             ct = r.headers.get("content-type", "")
             if r.request.resource_type in ("xhr", "fetch") or "json" in ct:
                 body = r.text()
-                calls.append((r.request.method, r.status, r.url, ct, len(body), body[:600]))
+                lim = 4000 if "api" in r.url and "google" not in r.url else 400
+                calls.append((r.request.method, r.status, r.url, ct, len(body), body[:lim]))
+                if "api" in r.url and "google" not in r.url:
+                    print("API_POST_DATA:", (r.request.post_data or "")[:500])
         except Exception as e:
             calls.append((r.request.method, r.status, r.url, "?", 0, f"okunamadı: {e}"))
     page.on("response", on_resp)
@@ -46,5 +49,5 @@ with sync_playwright() as p:
     print("\n=== XHR/FETCH ===")
     for c in calls:
         print(c[0], c[1], c[2], c[3], c[4])
-        print("   ", c[5].replace("\n", " ")[:600])
+        print("   ", c[5].replace("\n", " ")[:4000])
     b.close()
